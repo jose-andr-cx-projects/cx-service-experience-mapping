@@ -63,7 +63,7 @@ Use:
 
 where a meaningful customer interaction transition exists.
 
-Targeted Mode may remain blank where no meaningful transition exists.
+Targeted Mode may remain blank where there is no meaningful transition.
 
 Do not add additional Mode-sequence fields until real service mapping demonstrates a need.
 
@@ -141,3 +141,59 @@ The current mapping sample is sufficient when it reveals enough recurring patter
 This project remains separate from Strategic OS.
 
 Only promote a reusable pattern into Strategic OS if repeated real use exposes a genuine Strategic OS capability gap.
+
+## Decision 15 — Bitbucket is the Atlassian integration surface
+
+**Status:** Confirmed
+
+The Bitbucket repository is used to run the project pipeline that creates and updates the linked Jira and Confluence project surfaces.
+
+The pipeline must remain manually triggered during the current phase.
+
+Do not introduce automatic publishing or two-way synchronisation until repeated use demonstrates a need.
+
+## Decision 16 — Jira uses one Deliverable for the current phase
+
+**Status:** Confirmed
+
+The current Jira delivery record is one **Deliverable**:
+
+`CX Service Experience Mapping — Measurement Opportunity Validation`
+
+The pipeline should not automatically create Epics, Stories, Tasks or Sub-tasks beneath it.
+
+Lower-level Jira delivery structure can be created later by the appropriate owner if the work moves into implementation.
+
+## Decision 17 — Confluence structure remains minimal
+
+**Status:** Confirmed
+
+Use one parent page:
+
+`CX Service Experience Mapping`
+
+with two child pages only:
+
+- `Project Management`
+- `Measurement Opportunity Work`
+
+`Project Management` provides the readable phase, scope, Jira Deliverable link and current next action.
+
+`Measurement Opportunity Work` contains the evolving findings and Measurement Opportunity Register.
+
+Do not add additional Confluence structure unless real use demonstrates a need.
+
+## Decision 18 — Atlassian creation connectivity is proven
+
+**Status:** Validated
+
+The Bitbucket pipeline has successfully created Jira and Confluence content using the configured Atlassian connection.
+
+The proof demonstrated:
+
+- Jira item creation;
+- Confluence page creation;
+- repository, build and commit traceability;
+- usable linked project content.
+
+Future pipeline work can therefore focus on producing or refreshing real project deliverables rather than repeating connectivity tests.

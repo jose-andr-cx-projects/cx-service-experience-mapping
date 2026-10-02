@@ -197,3 +197,21 @@ Keep a measurement opportunity only if it improves at least one of:
 - ability to hand work to the correct next owner.
 
 If it only adds documentation, remove it.
+
+## Context preparation and exception review
+
+Prepare source context before interpreting ambiguous interactions. Use the working workbook's linked Context mapping view, supported by Catalogue context, Salesforce context and Check log.
+
+- Keep catalogue descriptions and delivery-team facts separate from working interpretations.
+- Map customer-facing website section, topic, subtopic and canonical URL alongside the catalogue hierarchy. Website navigation does not replace organisational structure.
+- Preserve one-to-many candidate associations. Repeated Salesforce names across different offerings are not automatically duplicate records.
+- Prefer stable Salesforce IDs. Until available, match the exact service group and service name together; never choose the first ambiguous name match.
+- Retrieve configuration records separately from Case activity. Case labels and counts do not establish service descriptions, active status or routing.
+- Record reviewed-but-blank entries so a blank does not mean an interaction has not been considered.
+- Capture cross-mode information as context, without adding it to the controlled Mode list.
+- Keep a dated check log with evidence, status, next action, owner capability and resolution evidence.
+- Automate retrieval and deterministic joins where supported. Mode and Segment interpretation still requires evidence and judgement.
+
+The current linked workbook refreshes cell edits but its row associations and diagnostic counts are a snapshot. Rebuild associations and rerun checks after source identities or row structure change.
+
+See [Context validation and retrieval](context-validation.md) for the review findings, retrieval prompt and Lightning fallback. Context preparation does not change the measurement-opportunity phase or require full-catalogue classification.

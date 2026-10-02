@@ -210,3 +210,34 @@ A blank should not automatically be interpreted as:
 - no possible Mode.
 
 Where the reason matters, use the status or notes associated with the mapping rather than inventing a value.
+
+## Supporting context and check fields
+
+These fields support the working workbook. They do not add mandatory fields to every measurement opportunity.
+
+| Field | Definition and authority |
+| --- | --- |
+| catalogue_id / sf_context_id | Local workbook cross-references; not organisational record IDs. |
+| catalogue_description / sf_description | Exact authoritative source description when retrieved. Leave blank when unavailable. |
+| working_context / working_description / customer_task | Explicitly provisional interpretation of scope or customer intent. |
+| website_section / website_topic / website_subtopic / website_url | Customer-facing content structure and source URL. Record whether navigation and offering association have been verified. |
+| website_evidence / mapping_status | Evidence and uncertainty associated with the website-to-offering interpretation. |
+| delivery_team / team_evidence | Catalogue delivery ownership with an organisational source; do not infer from a website topic or CRM queue. |
+| sf_record_id | Stable Salesforce configuration-record ID when retrieved. |
+| record_type / is_active | Configuration values from current source records; transcript observations must be labelled separately. |
+| sla_value / sla_unit | SLA value, unit and clock basis where known. Do not assume calendar versus business days. |
+| responsible_team / responsible_officer | Configuration ownership, with source and freshness evidence. |
+| config_observation / observation_source | Reported configuration observation and its evidence, separate from a current system extract. |
+| configuration_status / config_source | Verification state and configuration source. |
+| source_last_modified / extract_timestamp | Source modification and extraction timestamps, with timezone where available. |
+| candidate_catalogue_count / candidate_catalogue_ids | Candidate associations in the dated mapping snapshot, not confirmed relationships. |
+| information_context | Context for enquiries or information spanning Modes. It is not an eighth Mode. |
+| review_state | Whether the interaction or service area has been reviewed, including intentional blanks. |
+| source_rows / original_row | Traceability within the current workbook version; not stable source IDs. |
+| check_id / checked_on / check_type / scope | Local check reference, review date, issue type and affected scope. |
+| finding / evidence / next_action / next_owner_capability | Supported finding or explicit hypothesis, source and practical handoff. |
+| resolution_evidence / resolved_on | Evidence and date required to support closure. |
+
+Check-log workflow status uses **Open, In progress, Resolved, Recorded**. These are workflow states, separate from the mapping evidence states **Confirmed, Working hypothesis, Open, Not represented, Future signal**.
+
+An inaccessible source means not visible within the checked scope. It does not establish absence from Salesforce or Databricks.

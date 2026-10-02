@@ -197,3 +197,27 @@ The proof demonstrated:
 - usable linked project content.
 
 Future pipeline work can therefore focus on producing or refreshing real project deliverables rather than repeating connectivity tests.
+
+## Decision 19 — Context supports interpretation without replacing source truth
+
+**Status:** Adopted working method, 2 October 2026
+
+Add catalogue and Salesforce context plus an evidence-backed check log to the working workbook. Separate authoritative descriptions, public website structure, delivery ownership and working interpretations. Preparing context across the supplied rows does not require classifying every offering.
+
+## Decision 20 — Preserve ambiguous associations
+
+**Status:** Adopted working method, 2 October 2026
+
+Do not delete repeated names or select one catalogue association merely to simplify the mapping. Use stable Salesforce IDs when available. Otherwise retain exact group/name pairs and all candidate offerings until description and purpose evidence supports validation.
+
+## Decision 21 — Reviewed blanks and cross-mode information remain visible
+
+**Status:** Adopted working method, 2 October 2026
+
+Record review coverage independently of Mode completion. Leave uncertain enquiry Modes blank. Capture cross-mode information as context rather than changing the controlled seven-Mode list.
+
+## Decision 22 — Retrieve configuration in bulk before manual escalation
+
+**Status:** Adopted working method, 2 October 2026
+
+Use one read-only Genie discovery/extraction where available. Inspect Salesforce Lightning configuration if that retrieval cannot establish the required source. Limit service-owner intervention to unresolved scope, ownership, lifecycle and association questions. No configuration changes or automatic Mode/Segment classification are authorised by this retrieval method.

@@ -316,3 +316,220 @@ The reusable lesson is not merely "look in Product2". It is:
 > Translate the business-visible Salesforce label by tracing the field definition to its underlying object and then separate master configuration, supporting configuration and transactional evidence.
 
 That method should be reused when translating other Salesforce concepts whose UI labels obscure their technical architecture.
+
+
+## Current state versus forward classification
+
+### Architecture caveat
+
+Salesforce Product2 should be treated as the **current operational state**, not as the ideal or target service architecture.
+
+The Salesforce service configuration has accumulated legacy from multiple architectural changes since 2017. Product2 therefore remains essential for traceability and for understanding how services are configured today, but its structure should not be reproduced uncritically in future service mapping or analytics.
+
+The Customer Intelligence team developed the `ServiceName` / `ServiceNameGrouped` schema represented in `datahub_refined.customer.vwservice_group` to rationalise this legacy complexity.
+
+For this project, that schema is the **line in the sand moving forward**:
+
+```text
+CURRENT OPERATIONAL STATE
+Salesforce Product2
+        ↓ translate / rationalise
+FORWARD CLASSIFICATION
+Customer Intelligence ServiceName / ServiceNameGrouped
+        ↓
+SERVICE EXPERIENCE MAPPING
+Service Catalogue → CX Modes → Segments → Measurement
+```
+
+Interpret the layers as follows:
+
+- **Product2** answers: what is configured in Salesforce now?
+- **ServiceName / ServiceNameGrouped** answers: how should Salesforce services be consistently classified for analysis and mapping moving forward?
+- **Service Catalogue** remains the organisational service model being mapped to the Salesforce/CX layer.
+- A Product2 record that does not map to the Customer Intelligence classification is a **classification gap or legacy exception to investigate**, not automatically a missing category that should be added to the forward classification.
+
+This distinction prevents legacy Salesforce architecture from becoming the target architecture by accident.
+
+## Databricks reusable access pattern
+
+### Purpose
+
+Provide a repeatable way for analysts, Genie and downstream mapping artefacts to use existing Salesforce configuration without reconstructing it from Cases.
+
+### Source layers
+
+Use these layers in order:
+
+1. **Current Salesforce configuration**
+   - `datahub_refined_source.salesforce.vwproduct2`
+   - Grain: one Salesforce Product2 record.
+   - Stable technical join key: Product2 `Id`.
+   - Prefer `Service_Unique_Name__c` as a semantic/business identifier where appropriate.
+   - Do not rely on `Name` as a unique key.
+
+2. **Forward Customer Intelligence classification**
+   - `datahub_refined.customer.vwservice_group`
+   - Relevant fields: `ServiceName`, `ServiceNameGrouped`, `Theme`, `isActive`, `SourceSystem`.
+   - Use to enrich Product2 with the rationalised Service Name / Service Group / Theme classification.
+   - Do not assume every Product2 record should have a match.
+
+3. **Observed operational evidence**
+   - Salesforce Case source/refined views.
+   - Join to Product2 using the Product relationship / Product ID where available.
+   - Use for activity, volumes, outcomes and historical observation, not to define current Product2 configuration.
+
+4. **Specialist assignment configuration**
+   - `Service_Assignment_Rule__c` is confirmed in Salesforce but is not currently replicated as a standalone Databricks source.
+   - Treat assignment-rule configuration as unavailable in the reusable Databricks layer until replication is established. Do not reconstruct it from Case labels as if it were current master data.
+
+### Canonical reusable output
+
+The preferred reusable Databricks asset should expose one row per Product2 record and preserve both the current-state and rationalised layers.
+
+Minimum recommended fields:
+
+```text
+sf_product_id
+sf_service_unique_name
+sf_product_name
+sf_service_friendly_name
+sf_service_description
+sf_service_type
+sf_reporting_service_type
+sf_is_active
+sf_service_calendar
+sf_sla_customer_response
+sf_sla_warning_notification
+sf_auto_close
+sf_auto_close_outcome
+sf_disable_auto_notifications
+sf_disable_auto_notifications_creation
+sf_creation_description
+sf_creation_description_2
+sf_creation_description_sms
+sf_work_order_auto_create
+
+service_name
+service_group
+service_theme
+
+classification_match_status
+classification_review_note
+
+sf_created_datetime
+sf_last_modified_datetime
+source_refresh_datetime
+```
+
+Names in the reusable output are semantic aliases. Implementations must first inspect the actual Databricks schema and map only confirmed source columns.
+
+### Classification status
+
+Use a controlled status rather than forcing unmatched Product2 records into the forward classification:
+
+- `MATCHED` — Product2 can be mapped confidently to the Customer Intelligence Service Name / Service Group classification.
+- `UNMATCHED_CURRENT_STATE` — Product2 exists but has no confident forward-classification match.
+- `AMBIGUOUS` — more than one candidate classification exists or the join is not unique.
+- `REVIEW_REQUIRED` — evidence is insufficient or a business decision is needed.
+
+Do not interpret `UNMATCHED_CURRENT_STATE` as an error by default. It may represent legacy, technical, inactive or otherwise intentionally excluded Salesforce configuration.
+
+### Reusable Genie / analyst procedure
+
+When refreshing or rebuilding the Salesforce configuration context:
+
+1. Inspect `vwproduct2` metadata and confirm the available columns and data types.
+2. Confirm row grain and uniqueness of Product2 `Id`.
+3. Retain active **and inactive** Product2 records unless the use case explicitly requires active only.
+4. Profile duplicates for `Name` and `Service_Unique_Name__c`; do not silently deduplicate.
+5. Join Product2 to `vwservice_group` only through a validated relationship.
+6. Preserve unmatched Product2 records and assign a classification status.
+7. Report match rate, unmatched count, ambiguous count and freshness.
+8. Join Case data through Product ID for operational evidence when required.
+9. Keep assignment-rule configuration separate until its source object is replicated.
+10. Export or expose the canonical Salesforce context for downstream Power Query, mapping and measurement work.
+
+### Reusable Genie prompt
+
+```text
+Build a current-state Salesforce service configuration context from Databricks.
+
+SOURCE RULES
+
+1. Treat datahub_refined_source.salesforce.vwproduct2 as the source for current Salesforce Product2 service configuration.
+2. Treat datahub_refined.customer.vwservice_group as the Customer Intelligence forward classification layer for Service Name, Service Group and Theme.
+3. Salesforce Product2 represents current operational configuration, including legacy created through architectural changes since 2017. Do not treat Product2 as the target service taxonomy.
+4. The Customer Intelligence ServiceName / ServiceNameGrouped schema is the line-in-the-sand classification for analysis and service mapping moving forward.
+5. Preserve Product2 records that do not match the forward classification. Flag them; do not invent or force a classification.
+6. Do not infer current configuration from Case records when Product2 contains the field.
+7. Use Product2 Id for Salesforce referential joins. Do not assume Product2 Name is unique.
+8. Preserve inactive records and NULL values.
+9. Do not invent object names, field names, joins or missing values.
+10. Service_Assignment_Rule__c is not currently available as a standalone replicated Databricks source. Do not reconstruct it from Case data and label it as current assignment-rule configuration.
+
+PROCESS
+
+A. Inspect the actual schemas first and list the confirmed source columns.
+B. Confirm Product2 row grain, Id uniqueness, duplicate Names, duplicate Service_Unique_Name__c values and source freshness.
+C. Create one output row per Product2 Id.
+D. Add available current-state Product2 configuration fields.
+E. Enrich with Customer Intelligence ServiceName, ServiceNameGrouped and Theme using a validated join.
+F. Add classification_match_status using:
+   MATCHED
+   UNMATCHED_CURRENT_STATE
+   AMBIGUOUS
+   REVIEW_REQUIRED
+G. Do not discard unmatched Product2 records.
+H. Report:
+   - total Product2 records
+   - active / inactive
+   - matched to forward classification
+   - unmatched current-state
+   - ambiguous
+   - duplicate Product2 Names
+   - duplicate semantic keys
+   - latest source timestamp / freshness
+I. Where Case evidence is requested, join using ProductId = Product2.Id and keep transactional metrics separate from configuration fields.
+
+OUTPUT
+
+Return a reusable Salesforce service context with semantic aliases for:
+sf_product_id
+sf_service_unique_name
+sf_product_name
+sf_service_friendly_name
+sf_service_description
+sf_service_type
+sf_reporting_service_type
+sf_is_active
+sf_service_calendar
+sf_sla_customer_response
+sf_sla_warning_notification
+sf_auto_close
+sf_auto_close_outcome
+sf_disable_auto_notifications
+sf_disable_auto_notifications_creation
+sf_creation_description
+sf_creation_description_2
+sf_creation_description_sms
+sf_work_order_auto_create
+service_name
+service_group
+service_theme
+classification_match_status
+classification_review_note
+sf_created_datetime
+sf_last_modified_datetime
+source_refresh_datetime
+
+Before creating a persistent table or view, show the proposed source-to-output field mapping, join logic, QA results and any unavailable fields for approval.
+```
+
+### Governance rule
+
+The reusable Databricks layer is a **translation/context asset**, not a replacement source of truth.
+
+- Salesforce remains authoritative for Product2 configuration.
+- Customer Intelligence's Service Name / Service Group schema is the preferred forward classification for this mapping and analytical use.
+- The Service Catalogue remains authoritative for its organisational service definitions.
+- Databricks makes those layers reusable and joinable; it does not erase their different meanings or authority.

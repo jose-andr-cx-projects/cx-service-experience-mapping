@@ -2,13 +2,42 @@
 
 ## Purpose
 
-Create a working connection between the City of Melbourne service model and customer experience model so service interactions can be compared, measured and improved across organisational boundaries.
+Create a working service-experience relationship model that connects the City of Melbourne service model with customer, interaction and operational context.
 
 The working mapping connects:
 
-`Service Catalogue → Salesforce CRM → Interaction Modes → Customer Segments → Measurement opportunity`
+`Customer / Segment ↔ Interaction Mode ↔ Service / Service Offering ↔ Operational evidence ↔ Experience measurement`
 
-The mapping is not an end in itself. Its purpose is to expose **usable customer-experience measurement opportunities** that can be handed to the appropriate next owner for validation, measurement design or implementation.
+The mapping is not an end in itself. Its strategic purpose is to test and make visible the relationships needed for a **business-led Customer Data Architecture**, while still producing usable cross-service measurement opportunities.
+
+The Service Catalogue remains the service spine. Salesforce is an operational evidence layer. Segments explain **who**; Modes explain the **interaction type and customer expectation**. None of these layers on its own is the customer architecture.
+
+## Strategic lens
+
+This project is the service-experience modelling contribution to the current Customer Data Architecture priority.
+
+It should help answer:
+
+- which customer Segments interact with which services;
+- which Interaction Modes describe those interactions;
+- what expectations repeat across different services;
+- where operational systems such as Salesforce provide only partial coverage;
+- where customer or service relationships are not currently represented;
+- what can be measured consistently across services; and
+- which recurring patterns suggest a reusable CX capability rather than an isolated service fix.
+
+The project should use practical hypotheses and visible uncertainty rather than waiting for perfect data.
+
+It must not:
+
+- invent relationships to make the model look complete;
+- treat Service Offering as equivalent to a customer journey;
+- treat Salesforce coverage as equivalent to organisational service coverage;
+- define a final enterprise customer-data model;
+- turn Segments into deterministic customer classifications; or
+- promote proposed measures or relationships without human review.
+
+A journey may cross several Service Offerings and Modes.
 
 ## Source authority
 
@@ -25,19 +54,19 @@ This repository governs the mapping method, definitions, decisions and reusable 
 
 ## Current phase
 
-**Measurement opportunity validation**
+**Customer architecture and measurement opportunity validation**
 
 The current phase uses a representative sample of real services to determine whether the mapping can produce a useful measurement view across services.
 
 The phase should answer:
 
-> Can Service Catalogue, Salesforce, customer Segments and Interaction Modes be combined to identify measurable customer-experience patterns that are useful beyond a single service?
+> Can Service Catalogue, operational service evidence, customer Segments and Interaction Modes be connected well enough to reveal reusable customer-service relationships, measurable experience patterns and gaps that matter to a business-led customer architecture?
 
 The work should produce something another person or team can take forward without requiring the original mapper to remain the owner.
 
 ## Phase output
 
-The primary output is a **Measurement Opportunity Register** derived from the working service mapping.
+The primary working output remains a **Measurement Opportunity Register**, supported by a service-experience relationship model that makes architecture gaps and reusable cross-service patterns visible.
 
 Each candidate opportunity should make visible:
 
@@ -65,7 +94,7 @@ The register should support handoff into work such as:
 
 ## Working principle
 
-> **Map enough to reveal measurement opportunities. Do not complete the catalogue for completeness.**
+> **Map enough to reveal useful customer-service relationships and measurement opportunities. Do not complete the catalogue for completeness.**
 
 A useful output is more important than exhaustive classification.
 
@@ -88,6 +117,10 @@ Product2 is current operational configuration, including legacy. Customer Intell
 ### Customer lens
 
 `Resident Segment / Non-Resident Segment`
+
+### Customer architecture extension
+
+`Customer / Segment ↔ relationship/context ↔ Mode expectation ↔ Service / Offering ↔ observed experience ↔ evidence signal`
 
 ### Measurement extension
 

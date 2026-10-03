@@ -108,3 +108,24 @@ Technical references:
 Run the Genie prompt once and return the configuration export. Join by confirmed stable ID where possible; otherwise accept only an unambiguous current group/name match. Keep conflicting candidates visible. Obtain website structure in one export if accessible, then resolve only the remaining material exceptions.
 
 Return to the representative interaction sample and Measurement Opportunity Register once context is sufficient. Do not turn configuration discovery into an enterprise cleanup or a new KPI framework.
+
+
+## Workbook rebuild checkpoint — 3 October 2026
+
+The working workbook has been rebuilt around refreshable CSV sources and Power Query rather than preserving the previous inferred mapping table as the primary review surface.
+
+Current controls:
+- `Service_catalogue` retains only authoritative `service_area`, `service` and `service_offering`; current baseline: **198 distinct offerings**.
+- `Summary` is the protected review grain and must remain at 198 rows unless the source catalogue changes.
+- transcript-inferred catalogue mappings are not retained as source truth.
+- Salesforce configuration context is sourced from the enriched Product2 extract and CI classification; raw Product2 names are not assumed unique and are not directly merged into Summary.
+- `service_friendly_name` is treated as legacy and excluded from the review-oriented Salesforce summary.
+- `Salesforce_summary` groups classified operational context by CI service classification for review while unmatched current-state Product2 remains available in the full Salesforce context.
+- `Website_context` contains **574 sitemap records**. Source-derived enrichment adds `sitemap_description`, `sitemap_action_label` and `description_source`; blanks are retained where the sitemap provides no description/action.
+- automatic/fuzzy website matching has been stopped. Website context is currently a reviewer aid, not a confirmed catalogue mapping.
+- source/staging/helper queries are Connection Only unless a visible review sheet is required.
+- the workbook README source is `01_README.csv`, a quoted UTF-8 three-column CSV designed to survive Power Query refresh.
+
+### Next-session control
+
+Before substantive human review, create a persistent `Review_input` table keyed by a stable composite catalogue key (service area + service + service offering, subject to uniqueness check) and merge it into Summary. This prevents refresh from erasing Dennis's review decisions and notes.

@@ -221,3 +221,42 @@ Record review coverage independently of Mode completion. Leave uncertain enquiry
 **Status:** Adopted working method, 2 October 2026
 
 Use one read-only Genie discovery/extraction where available. Inspect Salesforce Lightning configuration if that retrieval cannot establish the required source. Limit service-owner intervention to unresolved scope, ownership, lifecycle and association questions. No configuration changes or automatic Mode/Segment classification are authorised by this retrieval method.
+
+
+## Decision 23 — Rebuilt workbook uses a protected Service Catalogue spine
+
+**Status:** Confirmed, 3 October 2026
+
+The clean `Service_catalogue` layer contains the authoritative Service Catalogue hierarchy only: `service_area`, `service` and `service_offering`. The current baseline is 198 distinct service offerings. `Summary` uses this as its protected grain; enrichment must not create additional rows unless the authoritative catalogue changes.
+
+Transcript-inferred catalogue mappings are not preserved as source truth.
+
+## Decision 24 — Salesforce and website context remain separate evidence layers
+
+**Status:** Confirmed, 3 October 2026
+
+Do not directly join raw Product2 or website sitemap rows into the 198-row Summary where that would create fan-out or manufacture relationships. Salesforce Product2 is current operational state; Customer Intelligence classification is the rationalised forward classification. Website context is customer-facing information architecture. Neither is assumed to be one-to-one with Service Catalogue offerings.
+
+Candidate relationships may be investigated later but must remain explicit hypotheses until validated.
+
+## Decision 25 — Website enrichment is source-first
+
+**Status:** Confirmed, 3 October 2026
+
+The saved City of Melbourne sitemap is used as the website source. The current Website context contains 574 sitemap records and adds sitemap descriptions and action labels only where those values are present in the source. Blank remains valid. AI-generated page descriptions are not used as evidence.
+
+Automatic website-to-catalogue matching was stopped. The immediate purpose of Website context is to help reviewers understand what customer-facing pages are about.
+
+## Decision 26 — Workbook presentation is separated from helper queries
+
+**Status:** Confirmed, 3 October 2026
+
+Visible sheets are limited to review/reference surfaces. Source, staging and helper queries should be Connection Only where they do not require a visible worksheet, preventing deleted staging sheets from reappearing on refresh.
+
+The README CSV was rebuilt as a correctly quoted UTF-8 three-column source file and remains refreshable through Power Query.
+
+## Decision 27 — Human review must be refresh-safe
+
+**Status:** Confirmed, 3 October 2026
+
+Do not rely on manually typed decisions or notes inside Power Query output columns because refresh can overwrite them. Before Dennis begins substantive review, create a persistent review-input table keyed to a stable catalogue key and merge that input into the refreshable Summary.

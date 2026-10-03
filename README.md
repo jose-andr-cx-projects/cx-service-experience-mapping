@@ -19,7 +19,7 @@ Organisational systems of record remain authoritative for original service data,
 - CX Segments and Modes source material;
 - governed Voice of Customer and measurement sources.
 
-The current Excel workbook is the working mapping artefact.
+The current Excel workbook is the working review artefact. Its protected spine is the authoritative Service Catalogue hierarchy: **198 distinct service offerings** in the current baseline. Supporting Salesforce and website context are kept as separate evidence layers rather than being automatically treated as confirmed mappings.
 
 This repository governs the mapping method, definitions, decisions and reusable outputs. It does not replace organisational source systems.
 
@@ -77,7 +77,9 @@ A useful output is more important than exhaustive classification.
 
 ### Operational structure
 
-`Salesforce Service Group → Salesforce Service Name`
+`Salesforce Product2 current state → Customer Intelligence ServiceName / ServiceNameGrouped forward classification`
+
+Product2 is current operational configuration, including legacy. Customer Intelligence provides the rationalised forward classification; unmatched Product2 records remain visible rather than being forced into that classification.
 
 ### Experience structure
 
@@ -167,6 +169,24 @@ This phase does not need to:
 The current phase is complete when a representative set of services has been mapped far enough to produce a **credible Measurement Opportunity Register** containing a small set of clearly evidenced or explicitly caveated opportunities, each with a practical handoff path for further validation or implementation.
 
 The output should be usable by a future owner without needing to reconstruct the logic from chat history.
+
+## Current workbook architecture
+
+The rebuilt workbook is source-first and refreshable:
+
+`CSV/source files → Power Query source/context queries → Summary review surface`
+
+- `Service_catalogue` is the clean 198-offering organisational spine.
+- `Summary` must preserve that 198-row grain unless the authoritative catalogue changes.
+- `Salesforce_context` retains full Product2/current-state and CI classification evidence.
+- `Salesforce_summary` provides a review-oriented CI-rationalised aggregation without expanding Summary.
+- `Website_context` contains the corporate sitemap hierarchy plus descriptions/action labels actually present in the saved sitemap.
+- Website and Salesforce relationships to catalogue offerings remain blank until supported by evidence or human review; fuzzy/name similarity is not source truth.
+- Transcript-inferred mappings are not preserved in the clean source layers.
+- Helper/staging queries should be Connection Only where a visible worksheet is not required.
+- Human review input must be stored in a refresh-safe input layer before operational review begins; typing into Power Query output is not durable.
+
+The visible review experience is intended to centre on Summary plus Salesforce context, Website context, Modes, Segments, Check log and README.
 
 ## Repository structure
 

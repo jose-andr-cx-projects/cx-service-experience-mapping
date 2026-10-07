@@ -98,23 +98,46 @@ Product2
 → notification behaviour
 ```
 
-### 2. Customer Intelligence grouped-service reference — analytical classification
+### 2. Customer Intelligence service fields — analytical layer
 
-Databricks source identified during discovery:
+For this validation, the Databricks boundary is the **Customer Intelligence** schema only.
+
+Relevant visible source:
 
 ```text
-datahub_refined.customer.vwservice_group
+datahub_refined.customer_intelligence.vwcase
 ```
 
-For this architecture translation, use only:
+The current Customer Intelligence `vwcase` exposes:
 
-- `ServiceNameGrouped` → semantic alias `ci_service_name_grouped`
+- `Service_Name`
+- `Service_Group`
 
-Use `ci_service_name_grouped` only as a Customer Intelligence grouping applied to Salesforce service context.
+For the service-experience mapping, retain only these semantic outputs:
 
-Do not treat `vwservice_group` as a replacement for Product2 configuration.
+- `sf_service_name`
+- `ci_service_name_grouped`
 
-**Source-lineage control:** `ci_service_name_grouped` is not currently proven to be Salesforce-only at source. The repository records observed `SourceSystem` values of `genesys`. Therefore the field must be treated as CI enrichment of Salesforce service records unless and until the contributing rows are explicitly validated as Salesforce-derived.
+Do not include `ci_theme`.
+
+Do not use or reference the `customer_account_management` schema in this lineage analysis.
+
+### Lineage rule
+
+The validation question is not which adjacent refined schema contains similar service fields. It is:
+
+> What upstream source feeds the relevant service fields into `customer_intelligence`?
+
+Current evidence supports:
+
+- `Service_Name` is present in `customer_intelligence.vwcase`.
+- Salesforce Case uses `Service_Name__c`, which resolves to Product `Name`.
+
+Therefore `sf_service_name` has a credible Salesforce lineage.
+
+The exact upstream derivation of `ci_service_name_grouped` within the Customer Intelligence layer is **still to be verified**. Do not infer it from a similarly named field in another schema.
+
+Until that derivation is confirmed, describe `ci_service_name_grouped` as a **Customer Intelligence classification field with source lineage pending validation**.
 
 ### 3. Service Assignment Rule — specialist routing configuration
 
@@ -185,9 +208,10 @@ Case.Product
 Case.Service_Name__c = Product.Name
         ↓
 
-SUPPORTING CLASSIFICATION
-vwservice_group
-ci_service_name_grouped
+CUSTOMER INTELLIGENCE
+customer_intelligence.vwcase
+Service_Name → sf_service_name
+Service_Group / grouped logic → ci_service_name_grouped
         ↓
 
 SPECIALIST CONFIGURATION
@@ -212,7 +236,7 @@ For this project, use the following source hierarchy:
 | What is the current service name/configuration? | Salesforce Product2 |
 | Is the service active? | Salesforce Product2 |
 | What customer-facing/friendly description is configured? | Salesforce Product2 |
-| What forward grouped classification is applied? | `vwservice_group.ServiceNameGrouped` as `ci_service_name_grouped`, with source-lineage validation |
+| What grouped Customer Intelligence classification is applied? | `customer_intelligence` layer; exact derivation of `ci_service_name_grouped` still to validate |
 | What specialist assignment/routing rule applies? | `Service_Assignment_Rule__c` |
 | How has the service actually appeared on cases? | Case / `vwcase` |
 | Has configuration changed historically? | Case history and Salesforce field history where available |
@@ -290,18 +314,23 @@ Detailed Salesforce configuration belongs in the Salesforce context layer. For t
 - Service Assignment Rule uses a Service Type global value set and dependent Service Subtype.
 - Service Assignment Rules are reportable in Salesforce.
 
-**Confirmed through Databricks discovery; requires source-governance validation**
+**Confirmed through Databricks discovery**
 
-- `datahub_refined.customer.vwservice_group` exposes `ServiceNameGrouped`, used here as `ci_service_name_grouped`.
-- Case-level refined/source views expose service-related transactional fields.
-- Current evidence does **not** establish that `ci_service_name_grouped` is sourced only from Salesforce; observed `SourceSystem` values include `genesys`.
+- `datahub_refined.customer_intelligence.vwcase` exposes `Service_Name` and `Service_Group`.
+- `customer_account_management` is outside the boundary for this lineage analysis.
+- `sf_service_name` can be traced conceptually to Salesforce Case `Service_Name__c` / Product `Name`.
+
+**Still source-lineage validation**
+
+- The exact Customer Intelligence transformation that produces `ci_service_name_grouped`.
+- Whether `ci_service_name_grouped` is derived exclusively from Salesforce-fed records or combines another upstream source.
 
 **Still to validate**
 
 - Direct bulk report/export coverage of Product2.
 - Whether all Product2 records in scope represent CX operational services.
 - Exact relationship between Product2 Service Type fields and Service Assignment Rule Service Type values.
-- Whether the `vwservice_group` rows used to populate `ci_service_name_grouped` can be constrained and validated as Salesforce-derived only.
+- Exact upstream source and transformation for `ci_service_name_grouped` inside the Customer Intelligence layer.
 - Whether Salesforce field history provides useful Product2 configuration-change history.
 
 ## Reuse note
@@ -315,154 +344,138 @@ The reusable lesson is not merely "look in Product2". It is:
 That method should be reused when translating other Salesforce concepts whose UI labels obscure their technical architecture.
 
 
-## Current state versus forward classification
+## Current state versus Customer Intelligence classification
 
-### Architecture caveat
+### Architecture boundary
 
-Salesforce Product2 should be treated as the **current operational state**, not as the ideal or target service architecture.
-
-For this mapping, keep the translation deliberately narrow:
+For this mapping, keep the model deliberately narrow:
 
 ```text
-CURRENT SALESFORCE STATE
-sf_service_name
-(from Product2.Name)
+SALESFORCE
+Case.Service_Name__c → Product.Name
         ↓
-CI GROUPED CLASSIFICATION
-ci_service_name_grouped
-(from vwservice_group.ServiceNameGrouped)
+CUSTOMER INTELLIGENCE
+customer_intelligence.vwcase
+        ├── Service_Name → sf_service_name
+        └── grouped service logic → ci_service_name_grouped
         ↓
 SERVICE EXPERIENCE MAPPING
 ```
 
 Interpret the two fields as follows:
 
-- **`sf_service_name`** answers: what is the service called in Salesforce now?
-- **`ci_service_name_grouped`** answers: what grouped Customer Intelligence classification is applied for analysis and mapping?
+- **`sf_service_name`** — the Salesforce service name represented in the Customer Intelligence layer.
+- **`ci_service_name_grouped`** — the grouped service classification produced or exposed by Customer Intelligence.
 
 ### Lineage status
 
-| Field | Immediate source | Salesforce-only status |
+| Field | Customer Intelligence location | Salesforce-only status |
 | --- | --- | --- |
-| `sf_service_name` | `datahub_refined_source.salesforce.vwproduct2.Name` / Salesforce Product2 `Name` | **Confirmed Salesforce-derived** |
-| `ci_service_name_grouped` | `datahub_refined.customer.vwservice_group.ServiceNameGrouped` | **Not yet confirmed Salesforce-only** |
+| `sf_service_name` | `customer_intelligence.vwcase.Service_Name` | **Salesforce lineage supported** |
+| `ci_service_name_grouped` | Customer Intelligence grouped-service logic / field to confirm | **Not yet verified** |
 
-The second field is a CI classification layer. Current repository evidence records `vwservice_group.SourceSystem = genesys` in observed rows, so the source cannot currently be described as Salesforce-only without explicit lineage validation.
+The validation must stay inside the Customer Intelligence lineage. Do not use `customer_account_management` as evidence for either field.
 
-If the downstream workbook is intended to contain Salesforce context only, populate `ci_service_name_grouped` only for rows joined to a Salesforce Product2 record through a validated relationship. This makes the output Salesforce-scoped while preserving the fact that the grouping itself is maintained in a CI reference view.
+The next technical check is to inspect the definition or upstream lineage of the Customer Intelligence view/field that supplies the grouped service value and determine whether its inputs are exclusively Salesforce-derived.
 
 ## Databricks reusable access pattern
 
 ### Purpose
 
-Provide a repeatable way for analysts, Genie and downstream mapping artefacts to expose the two service fields needed for this mapping without reconstructing them from Cases.
+Verify the two fields used by the mapping through the Customer Intelligence layer only.
 
-### Source layers
-
-1. **Salesforce service name**
-   - Source: `datahub_refined_source.salesforce.vwproduct2`
-   - Source field: `Name`
-   - Semantic alias: `sf_service_name`
-   - Grain: one Salesforce Product2 record.
-   - Stable technical join key: Product2 `Id`.
-   - Salesforce lineage: confirmed.
-
-2. **Customer Intelligence grouped classification**
-   - Source: `datahub_refined.customer.vwservice_group`
-   - Source field: `ServiceNameGrouped`
-   - Semantic alias: `ci_service_name_grouped`
-   - Use only as an enrichment of Salesforce Product2 context.
-   - Salesforce-only lineage: not yet confirmed; validate the source relationship/filter before describing it as Salesforce-derived.
-
-3. **Observed operational evidence**
-   - Salesforce Case source/refined views may be used for activity or historical observation.
-   - Do not use Case records to define either `sf_service_name` or `ci_service_name_grouped`.
-
-### Canonical reusable output
-
-Keep the reusable mapping context minimal:
-
-```text
-sf_product_id
-sf_service_name
-ci_service_name_grouped
-classification_match_status
-classification_review_note
-sf_last_modified_datetime
-source_refresh_datetime
-```
-
-### Classification status
+### Source boundary
 
 Use:
 
-- `MATCHED` — Product2 has one validated grouped classification.
-- `UNMATCHED_CURRENT_STATE` — Product2 exists but has no validated grouped classification.
-- `AMBIGUOUS` — more than one candidate grouped classification exists or the join is not unique.
-- `REVIEW_REQUIRED` — source lineage or mapping evidence is insufficient.
+```text
+datahub_refined.customer_intelligence
+```
 
-Do not force unmatched Salesforce service records into a CI grouping.
+Do not use `customer_account_management` for this validation.
 
-### Reusable Genie / analyst procedure
+### Fields in scope
 
-1. Inspect `vwproduct2` and confirm Product2 `Id` and `Name`.
-2. Expose `Name` as `sf_service_name`.
-3. Inspect `vwservice_group` and confirm `ServiceNameGrouped` plus the field(s) required to validate source lineage and the join.
-4. Test whether the candidate `vwservice_group` rows used for enrichment are Salesforce-derived only.
-5. If Salesforce-only lineage cannot be proven, label `ci_service_name_grouped` as CI enrichment rather than Salesforce source data.
-6. Join the grouping only through a validated relationship to Product2.
-7. Preserve unmatched Product2 records.
-8. Report match rate, unmatched count, ambiguous count and source freshness.
+1. **Salesforce service name**
+   - Visible in: `customer_intelligence.vwcase.Service_Name`
+   - Semantic alias: `sf_service_name`
+   - Salesforce lineage: supported by the known Salesforce Case → Product relationship.
 
-### Reusable Genie prompt
+2. **Customer Intelligence grouped service**
+   - Semantic alias: `ci_service_name_grouped`
+   - Exact Customer Intelligence source field/view: still to confirm.
+   - Salesforce-only lineage: still to confirm.
+
+### Minimal validation procedure
+
+1. Inspect the Customer Intelligence objects only.
+2. Locate every occurrence or derivation of:
+   - `Service_Name`
+   - the grouped service field used for `ci_service_name_grouped`.
+3. Inspect the view definition / lineage for those fields where permissions allow.
+4. Identify the immediate upstream table/view and source-system fields.
+5. Confirm whether every upstream input is Salesforce-derived.
+6. Record any non-Salesforce input explicitly.
+7. Do not infer lineage from naming similarity across other schemas.
+
+### Reusable Genie / analyst prompt
 
 ```text
-Build the minimal Salesforce service context needed for the CX service-experience mapping.
+Validate the source lineage of two service fields used by the CX service-experience mapping.
 
-SOURCE RULES
+BOUNDARY
 
-1. Use datahub_refined_source.salesforce.vwproduct2 as the source of Salesforce services.
-2. Map Product2 Name to sf_service_name.
-3. Use datahub_refined.customer.vwservice_group.ServiceNameGrouped only as ci_service_name_grouped.
-4. Before calling ci_service_name_grouped Salesforce-derived, verify the lineage of the vwservice_group rows used in the join. Current project evidence has observed SourceSystem = genesys, so do not assume Salesforce-only provenance.
-5. If Salesforce-only provenance cannot be established, describe ci_service_name_grouped as Customer Intelligence enrichment applied to Salesforce Product2 records.
-6. Use Product2 Id as the stable Salesforce technical key. Do not assume Product2 Name is unique.
-7. Preserve unmatched Product2 records and NULL values.
-8. Do not infer either field from Case records.
-9. Do not invent joins, field names or source-system provenance.
+Look only at datahub_refined.customer_intelligence and the upstream objects that directly feed its relevant views.
+
+Do not use customer_account_management as evidence or as a source for this analysis.
+
+FIELDS TO VALIDATE
+
+1. sf_service_name
+2. ci_service_name_grouped
+
+KNOWN EVIDENCE
+
+- customer_intelligence.vwcase exposes Service_Name and Service_Group.
+- Salesforce Case.Service_Name__c is known to resolve to Product.Name.
+
+TASK
+
+A. Locate the exact Customer Intelligence field that should populate sf_service_name.
+B. Locate the exact Customer Intelligence field or transformation that should populate ci_service_name_grouped.
+C. For each field, trace the lineage upstream until the originating source system is clear.
+D. State whether the field is:
+   - SALESFORCE_ONLY
+   - MIXED_SOURCE
+   - DERIVED_IN_CUSTOMER_INTELLIGENCE
+   - UNKNOWN
+E. Show the exact table/view and column chain used to reach that conclusion.
+F. If a view definition is accessible, show only the relevant transformation/join logic.
+G. Do not infer lineage from similarly named fields in another schema.
+H. Do not include Theme.
 
 OUTPUT
 
-Return one row per Product2 record with:
-sf_product_id
-sf_service_name
-ci_service_name_grouped
-classification_match_status
-classification_review_note
-sf_last_modified_datetime
-source_refresh_datetime
+Return:
+field_name
+customer_intelligence_object
+customer_intelligence_column
+immediate_upstream_object
+immediate_upstream_column
+originating_source_system
+lineage_status
+evidence
+open_question
 
-VALIDATION
-
-Report:
-- Product2 total
-- Product2 Id uniqueness
-- duplicate sf_service_name values
-- matched / unmatched / ambiguous classification counts
-- the exact join used
-- the exact source-lineage test for ci_service_name_grouped
-- whether the ci_service_name_grouped rows used are proven Salesforce-derived only
-- source freshness
-
-Before creating a persistent table or view, show the source-to-output mapping, join logic and lineage result for approval.
+Do not create or modify any table or view.
 ```
 
 ### Governance rule
 
-The reusable Databricks layer is a **translation/context asset**, not a replacement source of truth.
+The Databricks Customer Intelligence layer is a **translation/analytical layer**, not a replacement source of truth.
 
-- Salesforce remains authoritative for `sf_service_name`.
-- Customer Intelligence remains the source of `ci_service_name_grouped`.
-- Do not describe `ci_service_name_grouped` as Salesforce-derived unless its contributing rows have been explicitly validated as Salesforce-only.
+- Salesforce remains the originating business system for `sf_service_name` where the lineage check confirms the Case/Product path.
+- Customer Intelligence owns the analytical derivation exposed as `ci_service_name_grouped`.
+- Do not describe `ci_service_name_grouped` as Salesforce-only until its Customer Intelligence upstream lineage is explicitly verified.
+- `customer_account_management` is outside the scope of this lineage test.
 - The Service Catalogue remains authoritative for its organisational service definitions.
-- Databricks makes the layers reusable and joinable; it does not erase their different meanings or authority.

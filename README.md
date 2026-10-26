@@ -1,5 +1,8 @@
 # CX Service Experience Mapping
 
+> **Bitbucket transition (26 October 2026):** This GitHub repository is an existing project reference, not the intended ongoing CoM source of truth. The Bitbucket-first operating architecture and controlled Strategic OS intake are staged in [CX portfolio transition](https://github.com/jose-andr-cx-projects/cx-portfolio-context/tree/main/bitbucket-transition). Before replacing any organisational records, compare against the latest approved Bitbucket/Confluence/Jira sources. No ongoing cross-platform mirroring is intended. This note does not change the project's substantive decisions or status.
+
+
 ## Purpose
 
 Create a working service-experience relationship model that connects the City of Melbourne service model with customer, interaction and operational context.
